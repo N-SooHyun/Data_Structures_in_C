@@ -21,5 +21,11 @@
     <ClCompile Include="recursion.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="arr_struc_ptr.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="list.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

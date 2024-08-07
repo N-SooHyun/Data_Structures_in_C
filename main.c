@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char* argv[]) {
-	printf("%d\n", recursive(5));
+	func_main();
+
+	
+	
 }

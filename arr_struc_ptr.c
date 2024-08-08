@@ -68,10 +68,3 @@ SparseMatrix sparse_matrix_add2(SparseMatrix a, SparseMatrix b) {
 	c.terms = cc;
 	return c;
 }
-
-func_main() {
-	SparseMatrix m1 = { {{1,1,5},{2,2,9}},3,3,2 };
-	SparseMatrix m2 = { {{0,0,5},{2,2,9}},3,3,2 };
-	SparseMatrix m3;
-	m3 = sparse_matrix_add2(m1, m2);
-}

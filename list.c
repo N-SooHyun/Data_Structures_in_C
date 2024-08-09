@@ -114,7 +114,7 @@ void Double_append(int data) {//리스트 추가
 	}
 }
 
-void Double_select(int data) {//리스트 검색
+Double_Node* Double_select(int data) {//리스트 검색
 	Double_Node* temp = Double_Head;
 	while (temp != NULL) {
 		if (temp->Data == data) {
@@ -171,19 +171,89 @@ void Single_Circle_Append(int data) {
 		Single_Circle_Head->next = Single_Circle_Head;
 	}
 	else {
-		newNode->next = Single_Circle_Head->next;
-		Single_Circle_Head = newNode;
+		Single_Circle_List* temp = Single_Circle_Head;
+		while (temp->next != Single_Circle_Head) {
+			temp = temp->next;
+		}
+		temp->next = newNode;
+		newNode->next = Single_Circle_Head;
 	}
 }
 
 void Single_Circle_Delete(int data) {
-	Single_Circle_List* list = Single_Circle_Head;
-	while (list->next != Single_Circle_Head && list != NULL) {
-		list = list->next;
+	Single_Circle_List* temp= Single_Circle_Head;
+	Single_Circle_List* prev = Single_Circle_Head;
+	while (temp->next != Single_Circle_Head && temp != NULL) {
+		prev = temp;
+		temp = temp->next;
 	}
 	
-	if (list->Data != data) return;
+	if (temp->Data != data) return;
 	else {
-		
+		prev->next = temp->next;
+		free(temp);
 	}
+}
+
+void Single_Circle_Print() {
+	Single_Circle_List* list = Single_Circle_Head;
+	while (list->next != Single_Circle_Head && list != NULL) {
+		printf("%d\n", list->Data);
+		list = list->next;
+	}
+	printf("%d\n", list->Data);
+}
+
+void Single_Circle_main() {
+	Single_Circle_Append(10);
+	Single_Circle_Append(20);
+	Single_Circle_Append(30);
+	Single_Circle_Append(40);
+
+	Single_Circle_Print();
+}
+
+/*-------------------------ArrayList 구현 배열리스트-----------------------*/
+typedef struct {
+	int* array;
+	int size;			//사이즈
+	int capacity;		//용량
+}ArrayList;
+
+void initArrayList(ArrayList* list, int initCapacity) {
+	list->array = (int*)malloc(initCapacity * sizeof(int));
+	list->size = 0;
+	list->capacity = initCapacity;
+}
+
+void insertArrayList(ArrayList* list, int data) {
+	if (list->size == list->capacity) {
+		list->capacity *= 2;
+		list->array = (int*)realloc(list->array, list->capacity * sizeof(int));
+	}
+	list->array[list->size++] = data;
+}
+
+void freeArrayList(ArrayList* list) {
+	free(list->array);
+	list->array = NULL;
+	list->size = 0;
+	list->capacity = 0;
+}
+
+void ArrayList_main() {
+	ArrayList list;
+	initArrayList(&list, 1);		//4용량의 배열 생성
+
+	insertArrayList(&list, 10);
+	insertArrayList(&list, 20);
+	insertArrayList(&list, 30);
+	insertArrayList(&list, 40);
+	insertArrayList(&list, 50);
+
+	for (int i = 0; i < list.size; i++) {
+		printf("%d  ", list.array[i]);
+	}
+
+	freeArrayList(&list);
 }

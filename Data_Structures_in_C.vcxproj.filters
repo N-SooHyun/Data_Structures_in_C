@@ -27,5 +27,8 @@
     <ClCompile Include="list.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="DBMS.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

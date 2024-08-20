@@ -18,6 +18,7 @@ double log_two(double data, double base) {
 }
 
 int main(int argc, char* argv[]) {
+	//Array_Tree_main();
 	Linked_Tree_main();
 	
 

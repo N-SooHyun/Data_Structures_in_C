@@ -135,6 +135,10 @@
     <ClCompile Include="recursion.c" />
     <ClCompile Include="stack.c" />
     <ClCompile Include="Tree.c" />
+    <ClCompile Include="Tree_Directory.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tree_Directory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

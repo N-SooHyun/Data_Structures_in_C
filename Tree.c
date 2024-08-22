@@ -344,13 +344,13 @@ Linked_Tree_Node* Linked_Tree_Delete(Linked_Tree_Node* root, int data) {
 			return NULL;
 		}
 		//자식노드가 한개인경우
-		else if (root->Left != NULL) {
-			Linked_Tree_Node* temp = root->Left;
+		else if (root->Left == NULL) {
+			Linked_Tree_Node* temp = root->Right;
 			free(root);
 			return temp;
 		}
-		else if (root->Right != NULL) {
-			Linked_Tree_Node* temp = root->Right;
+		else if (root->Right == NULL) {
+			Linked_Tree_Node* temp = root->Left;
 			free(root);
 			return temp;
 		}

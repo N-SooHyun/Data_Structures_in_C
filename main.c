@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include<math.h>
+#include <Windows.h>
+
 
 #define MAX_SIZE_DATA 100 
 #define MAX_SIZE 10
@@ -18,9 +20,7 @@ double log_two(double data, double base) {
 }
 
 int main(int argc, char* argv[]) {
-	//Array_Tree_main();
-	Linked_Tree_main();
+	Linked_File_Tree_main();
 	
-
 }
 

@@ -12,7 +12,9 @@
 //1. 연결리스트를 이용한 구조체의 모델
 typedef struct Linked_Child_List {		//자식노드들을 가지는 연결리스트
 	struct Linked_File_Node* child;		//실제 자식노드의 구조체
-	struct Linked_Child_List* next;		//부모의 다음 자식 가리키는 구조체
+	struct Linked_File_Node* parent;	//나의 부모
+	struct Linked_Child_List* next;		//형제들중 내 직속동생	동생이없다면 막내
+	struct Linked_Child_List* prev;		//형제들중 내 직속형		형이없다면 첫째
 }Linked_Child_List;
 
 typedef struct Linked_File_Node {
@@ -20,6 +22,7 @@ typedef struct Linked_File_Node {
 	char* File_Date;
 	char* File_Type;
 	int type;		//0=dir, 1=txt
+	struct Linked_Child_List* parent_list;  //자신이 속한 부모의 리스트
 	struct Linked_Child_List* child_list;	//자식 노드들의 리스트	연결리스트의 헤드부분
 	int size;		//현재 자식 노드의 수
 }Linked_File_Node;
@@ -29,37 +32,57 @@ typedef struct Linked_File_Node {
 	이런 느낌
 	자식1 -> 손자1 -> 손자2 ->손자3 			
 */
-Linked_File_Node* Linked_Create_File_Node(char name[], int type) {
+Linked_File_Node* Linked_Create_File_Node(char name[], int type, Linked_Child_List* Parent) {
 	Linked_File_Node* newNode = (Linked_File_Node*)malloc(sizeof(Linked_File_Node));
 	strcpy_s(newNode->File_Name, sizeof(newNode->File_Name), name);
 	newNode->type = type;
 	newNode->File_Type = type == 0 ? "dir" : "txt";
 	newNode->size = 0;
 	newNode->child_list = NULL;
+	newNode->parent_list = Parent;
 	return newNode;
 }
 
 //자식리스트 생성
-Linked_Child_List* Linked_Create_Child_List(Linked_Child_List* NodeList, char name[], int type) {
-	NodeList = (Linked_Child_List*)malloc(sizeof(Linked_Child_List));		//자식연결노드 메모리 공간 할당
-	NodeList->next = NULL;													//방금자식이 생긴거라 자식이 한명
-	NodeList->child = Linked_Create_File_Node(name, type);					//자식연결노드에 진짜 자식데이터를 생성													//자식노드의 생성계수
-	return NodeList;
+Linked_Child_List* Linked_Create_Child_List(Linked_File_Node* currentParent, Linked_Child_List* currentNode, char name[], int type) {
+	currentNode = (Linked_Child_List*)malloc(sizeof(Linked_Child_List));		//자식연결노드 메모리 공간 할당
+	currentNode->next = NULL;													//막내라서 다음 형 없음
+	currentNode->child = Linked_Create_File_Node(name, type, currentNode);					//자식연결노드에 진짜 자식데이터를 생성
+	currentNode->prev = NULL;
+	currentNode->parent = currentParent;		//자식리스트를 가지는 부모는 현재의 노드가 됨
+	return currentNode;
 }
 
 //자식리스트 삽입
-Linked_Child_List* Linked_Insert_File_Node(char name[], int type, Linked_Child_List* currentNodeList) {
-	if (currentNodeList == NULL) {//자식 dir가 아무것도 없을때
-		currentNodeList = Linked_Create_Child_List(currentNodeList, name, type);
-		return currentNodeList;
+Linked_Child_List* Linked_Insert_File_Node(char name[], int type, Linked_File_Node* currentNode, Linked_Child_List* currentChildList) {
+	if (currentChildList == NULL) {//자식 dir가 아무것도 없을때
+		currentChildList = Linked_Create_Child_List(currentNode, currentChildList, name, type);
+		return currentChildList;
 	}
 	//재귀함수의 조건식 연결리스트의 끝자락으로 더이상의 자식노드가 없을때
-	if (currentNodeList->next == NULL) {
-		currentNodeList->next = Linked_Insert_File_Node(name, type, currentNodeList->next);
-		return currentNodeList;
+	if (currentChildList->next == NULL) {
+		currentChildList->next = Linked_Insert_File_Node(name, type, currentNode,currentChildList->next);
+		return currentChildList;
 	}
-	//자식노드가 한개 이상일때 재귀함수의 반복조건식
-	Linked_Insert_File_Node(name, type, currentNodeList->next);
+	else {
+		Linked_Insert_File_Node(name, type, currentNode, currentChildList->next);
+		return currentChildList;
+	}
+}
+
+//자식탐색
+Linked_Child_List* Linked_Select_File_Node(char name[], Linked_Child_List* childListNode) {
+	if (childListNode == NULL) return NULL;
+
+	if (strcmp(name, childListNode->child->File_Name) == 0) {
+		//파일 찾음
+		return childListNode;
+	}
+	else {
+		//파일 못찾음
+		childListNode = Linked_Select_File_Node(name, childListNode->next);
+		return childListNode;
+	}
 }
 
 //자식리스트 모두 보여주기
@@ -76,6 +99,9 @@ int Linked_File_print(Linked_File_Node* root) {
 	printf("%s  ", current_child_list->child->File_Name);
 	return 1;		//하위폴더 존재T
 }
+
+
+
 /*------------------------UI부분 함수---------------------------------------*/
 
 
@@ -125,7 +151,22 @@ Linked_Child_List* Linked_Make_Dir(Linked_File_Node* parent, char FileName[]) {
 		printf("잘못 입력하셨습니다. 다시 입력해주세요\n");
 	}
 
-	return Linked_Insert_File_Node(FileName, type, parent->child_list);
+	return Linked_Insert_File_Node(FileName, type, parent, parent->child_list);
+}
+
+//이름으로 진입
+Linked_File_Node* Linked_Access_Dir(Linked_File_Node* ParentNode, char FileName[]) {
+	Linked_Child_List* ChildNode;
+	while (1) {
+		Linked_Input_File_Name(FileName);//파일명 받아오기
+		ChildNode = Linked_Select_File_Node(FileName, ParentNode->child_list);
+		if (ChildNode == NULL) {
+			printf("찾을 수 없는 하위 디렉토리 입니다. ");
+			printf("다시 입력하세요");
+		}
+		else break;
+	}
+	return ChildNode->child;
 }
 
 //시작 부분
@@ -133,8 +174,18 @@ Linked_File_Node* Linked_UI_Create_Root(char arr_FileName[]) {
 	printf("파일 탐색기\n");
 	printf("만들고 싶은 ");
 	Linked_Input_File_Name(arr_FileName);
-	Linked_File_Node* root = Linked_Create_File_Node(arr_FileName, 0);
+	Linked_File_Node* root = Linked_Create_File_Node(arr_FileName, 0, NULL);
 	return root;
+}
+
+//상위폴더로 돌아가기
+Linked_File_Node* Linked_dir_return(Linked_File_Node* ParentNode) {
+	Linked_Child_List* returnNode = ParentNode->parent_list;
+	if (returnNode == NULL) {
+		printf("더 이상의 상위 폴더가 없습니다. 이미 최상위 폴더에 있습니다.\n");
+		return ParentNode;
+	}
+	return returnNode->parent;
 }
 
 //폴더 리스트
@@ -143,13 +194,14 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 	int roof = 1;
 	boolean child_dir;	//하위폴더여부
 	Linked_File_Node* HeadRoot = root;	//최상위 헤드폴더
-	Linked_File_Node* ParentNode;		//현재 부모 노드
-	Linked_Child_List* ChildNode;		//현재 자식 노드
+	Linked_File_Node* ParentNode = root;		//현재 부모 노드
+	Linked_File_Node* TempNode;				
+	Linked_Child_List* ChildNode = root->child_list;		//현재 자식 노드
 	while (roof) {
 		system("cls");
-		printf("<상위 폴더 : %s>\n", root->File_Name);
+		printf("<상위 폴더 : %s>\n", ParentNode->File_Name);
 		printf("하위 폴더 리스트 : ");
-		child_dir = Linked_File_print(root);
+		child_dir = Linked_File_print(ParentNode);
 		printf("\n");
 		printf("1. 폴더진입, 2. 폴더생성, 3. 폴더삭제, 4. 상위폴더로 돌아가기, 5. 종료: ");
 		scanf_s("%d", &selectNum);
@@ -157,7 +209,11 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 		switch (selectNum) {
 			case 1:
 				if (child_dir) {
-					//Linked_Access_Dir(root, FileName);
+					TempNode = Linked_Access_Dir(ParentNode, FileName);
+					if (TempNode != NULL) {
+						ParentNode = TempNode;
+						TempNode = NULL;
+					}
 					break;
 				}
 				system("cls");
@@ -165,13 +221,13 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 				break;
 			case 2:
 				//폴더생성
-				root->child_list = Linked_Make_Dir(root, FileName);
+				ParentNode->child_list = Linked_Make_Dir(ParentNode, FileName);
 				break;
 			case 3:
 				//폴더삭제
 				break;
 			case 4:
-				//상위폴더로 돌아가기
+				ParentNode = Linked_dir_return(ParentNode);
 				break;
 			case 5:
 				roof = 0;
@@ -181,13 +237,6 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 				break;
 		}
 	}
-}
-
-//이름으로 진입
-void Linked_Access_Dir(Linked_File_Node* node) {
-	system("cls");
-	printf("폴더 리스트 : %s\n", node->File_Name);
-	printf("접근하고자 하는 디렉토리 : ");
 }
 
 

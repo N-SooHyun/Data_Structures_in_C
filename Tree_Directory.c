@@ -16,7 +16,7 @@ typedef struct Linked_Child_List {		//자식노드들을 가지는 연결리스트
 }Linked_Child_List;
 
 typedef struct Linked_File_Node {
-	char* File_Name;
+	char File_Name[FILE_NAME_MAX_SIZE];
 	char* File_Date;
 	char* File_Type;
 	int type;		//0=dir, 1=txt
@@ -29,9 +29,9 @@ typedef struct Linked_File_Node {
 	이런 느낌
 	자식1 -> 손자1 -> 손자2 ->손자3 			
 */
-Linked_File_Node* Linked_Create_File_Node(char* name, int type) {
+Linked_File_Node* Linked_Create_File_Node(char name[], int type) {
 	Linked_File_Node* newNode = (Linked_File_Node*)malloc(sizeof(Linked_File_Node));
-	newNode->File_Name = name;
+	strcpy_s(newNode->File_Name, sizeof(newNode->File_Name), name);
 	newNode->type = type;
 	newNode->File_Type = type == 0 ? "dir" : "txt";
 	newNode->size = 0;
@@ -40,7 +40,7 @@ Linked_File_Node* Linked_Create_File_Node(char* name, int type) {
 }
 
 //자식리스트 생성
-Linked_Child_List* Linked_Create_Child_List(Linked_Child_List* NodeList, char* name, int type) {
+Linked_Child_List* Linked_Create_Child_List(Linked_Child_List* NodeList, char name[], int type) {
 	NodeList = (Linked_Child_List*)malloc(sizeof(Linked_Child_List));		//자식연결노드 메모리 공간 할당
 	NodeList->next = NULL;													//방금자식이 생긴거라 자식이 한명
 	NodeList->child = Linked_Create_File_Node(name, type);					//자식연결노드에 진짜 자식데이터를 생성													//자식노드의 생성계수
@@ -48,9 +48,10 @@ Linked_Child_List* Linked_Create_Child_List(Linked_Child_List* NodeList, char* n
 }
 
 //자식리스트 삽입
-Linked_Child_List* Linked_Insert_File_Node(char* name, int type, Linked_Child_List* currentNodeList) {
+Linked_Child_List* Linked_Insert_File_Node(char name[], int type, Linked_Child_List* currentNodeList) {
 	if (currentNodeList == NULL) {//자식 dir가 아무것도 없을때
-		return Linked_Create_Child_List(currentNodeList, name, type);
+		currentNodeList = Linked_Create_Child_List(currentNodeList, name, type);
+		return currentNodeList;
 	}
 	//재귀함수의 조건식 연결리스트의 끝자락으로 더이상의 자식노드가 없을때
 	if (currentNodeList->next == NULL) {
@@ -64,15 +65,15 @@ Linked_Child_List* Linked_Insert_File_Node(char* name, int type, Linked_Child_Li
 //자식리스트 모두 보여주기
 int Linked_File_print(Linked_File_Node* root) {		
 	if (root->child_list == NULL) {//자식이 한명도 없을경우
-		printf("하위 폴더 없음\n"); 
+		printf("하위 폴더 없음"); 
 		return 0;	//하위폴더 없음F
 	}
 	Linked_Child_List* current_child_list = root->child_list;
 	while (current_child_list->next!=NULL) {
-		printf("%s\n", current_child_list->child->File_Name);
-		current_child_list = current_child_list->next;		
+		printf("%s  ", current_child_list->child->File_Name);
+		current_child_list = current_child_list->next;
 	}
-	printf("%s\n", current_child_list->child->File_Name);
+	printf("%s  ", current_child_list->child->File_Name);
 	return 1;		//하위폴더 존재T
 }
 /*------------------------UI부분 함수---------------------------------------*/
@@ -113,7 +114,7 @@ void Linked_Input_File_Name(char arr_FileName[]) {
 }
 
 //하위폴더 생성
-void Linked_Make_Dir(Linked_File_Node* node, char FileName[]) {
+Linked_Child_List* Linked_Make_Dir(Linked_File_Node* parent, char FileName[]) {
 	int type;
 	Linked_Input_File_Name(FileName);//파일명 받아오기
 	while (1) {
@@ -124,7 +125,7 @@ void Linked_Make_Dir(Linked_File_Node* node, char FileName[]) {
 		printf("잘못 입력하셨습니다. 다시 입력해주세요\n");
 	}
 
-	Linked_Insert_File_Node(FileName, type, node->child_list);
+	return Linked_Insert_File_Node(FileName, type, parent->child_list);
 }
 
 //시작 부분
@@ -141,11 +142,15 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 	int selectNum;
 	int roof = 1;
 	boolean child_dir;	//하위폴더여부
-	system("cls");
+	Linked_File_Node* HeadRoot = root;	//최상위 헤드폴더
+	Linked_File_Node* ParentNode;		//현재 부모 노드
+	Linked_Child_List* ChildNode;		//현재 자식 노드
 	while (roof) {
+		system("cls");
 		printf("<상위 폴더 : %s>\n", root->File_Name);
 		printf("하위 폴더 리스트 : ");
 		child_dir = Linked_File_print(root);
+		printf("\n");
 		printf("1. 폴더진입, 2. 폴더생성, 3. 폴더삭제, 4. 상위폴더로 돌아가기, 5. 종료: ");
 		scanf_s("%d", &selectNum);
 		while (getchar() != '\n');
@@ -160,7 +165,7 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 				break;
 			case 2:
 				//폴더생성
-				Linked_Make_Dir(root, FileName);
+				root->child_list = Linked_Make_Dir(root, FileName);
 				break;
 			case 3:
 				//폴더삭제
@@ -184,7 +189,6 @@ void Linked_Access_Dir(Linked_File_Node* node) {
 	printf("폴더 리스트 : %s\n", node->File_Name);
 	printf("접근하고자 하는 디렉토리 : ");
 }
-
 
 
 void Linked_File_Tree_main() {

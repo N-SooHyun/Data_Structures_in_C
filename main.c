@@ -21,6 +21,8 @@ double log_two(double data, double base) {
 
 int main(int argc, char* argv[]) {
 	Linked_File_Tree_main();
+
+	
 	
 }
 

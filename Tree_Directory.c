@@ -62,6 +62,7 @@ Linked_Child_List* Linked_Insert_File_Node(char name[], int type, Linked_File_No
 	//재귀함수의 조건식 연결리스트의 끝자락으로 더이상의 자식노드가 없을때
 	if (currentChildList->next == NULL) {
 		currentChildList->next = Linked_Insert_File_Node(name, type, currentNode,currentChildList->next);
+		currentChildList->next->prev = currentChildList;	//이중연결
 		return currentChildList;
 	}
 	else {
@@ -85,6 +86,69 @@ Linked_Child_List* Linked_Select_File_Node(char name[], Linked_Child_List* child
 	}
 }
 
+Linked_Child_List* Linked_Delete_Child_List(Linked_Child_List* childListNode, Linked_File_Node* parent);
+Linked_File_Node* Linked_Delete_File_Node(Linked_File_Node* childNode);
+
+//트리삭제 자식1을 삭제할경우 자식1에 속한 모든 자식 손자는 전부 삭제되어야함
+//자식 노드 삭제
+Linked_File_Node* Linked_Delete_File_Node(Linked_File_Node* childNode) {
+	//자식리스트를 소유하고 있는가? 없다면 자식이 없음
+	if (childNode == NULL) {
+		return NULL;
+	}
+
+	if (childNode->child_list != NULL) {//자식리스트 존재
+		Linked_Delete_Child_List(childNode->child_list, childNode);
+		childNode->child_list = NULL; 
+	}
+
+	//현재 노드 제거
+	free(childNode);
+	return NULL;
+}
+
+//자식리스트 삭제
+Linked_Child_List* Linked_Delete_Child_List(Linked_Child_List* childListNode, Linked_File_Node* parent) {	
+	//자식이 더 존재하는가?에 대해서 확인절차를 거치고 재귀를 진행
+	if (childListNode == NULL) {	//자식이 없음 리스트가 없기에
+		return NULL;
+	}
+	
+	//자식이 존재
+	Linked_Delete_File_Node(childListNode->child);
+	childListNode->child = NULL;
+
+	//A B C의 자식리스트가 연결된 가운데 B리스트를 제거한다면 A와 C가 연결되어야 한다.
+	//case3가지 head인 A가없는경우 mid인B가없는경우 tail인C가 없는경우
+	//case1 A가없는경우 B의 prev=null으로 해준뒤 부모가 B를 가리키게 만들어야함
+	//case2 B가없는경우 A의 next=b->next로 해주면 끝
+	//case3 C가없는경우 b->next=NULL;만 해주면됨
+
+	//case3		자식이 한개인경우도 포함
+	if (childListNode->next == NULL) {
+		if (childListNode->prev != NULL) {
+			childListNode->prev->next = NULL;//앞에 직속형제가 있는경우 NULL값으로 잊으라고 함
+		}
+		else {//첫째이면서 자식이 혼자인경우
+			parent->child_list = NULL;
+		}
+		free(childListNode);
+	}
+	//case2
+	else if(childListNode->next != NULL && childListNode->prev != NULL){
+		childListNode->prev->next = childListNode->next;
+		free(childListNode);
+	}
+	//case1
+	else if (childListNode->prev == NULL && childListNode->next != NULL) {
+		childListNode->next->prev = NULL;//B가 head가 됨
+		parent->child_list = childListNode->next;//B가
+		free(childListNode);
+	}
+	
+}
+
+
 //자식리스트 모두 보여주기
 int Linked_File_print(Linked_File_Node* root) {		
 	if (root->child_list == NULL) {//자식이 한명도 없을경우
@@ -99,7 +163,6 @@ int Linked_File_print(Linked_File_Node* root) {
 	printf("%s  ", current_child_list->child->File_Name);
 	return 1;		//하위폴더 존재T
 }
-
 
 
 /*------------------------UI부분 함수---------------------------------------*/
@@ -137,6 +200,21 @@ void Linked_Input_File_Name(char arr_FileName[]) {
 			printf("다시 입력 해주세요\n");
 		}
 	}
+}
+
+//폴더 삭제
+void Linked_Delete_Dir(Linked_File_Node* parent, char FileName[]) {
+	Linked_Child_List* child;
+	while (1) {
+		Linked_Input_File_Name(FileName);//파일명 받아오기
+		child = Linked_Select_File_Node(FileName, parent->child_list);
+		if (child == NULL) {
+			printf("찾을 수 없는 하위 디렉토리 입니다.");
+			printf("다시 입력하세요\n");
+		}
+		else break;
+	}
+	Linked_Delete_Child_List(child, parent);
 }
 
 //하위폴더 생성
@@ -225,6 +303,11 @@ void Linked_dir_list(Linked_File_Node* root, char FileName[]) {
 				break;
 			case 3:
 				//폴더삭제
+				if (child_dir) {
+					Linked_Delete_Dir(ParentNode, FileName);
+					break;
+				}
+				printf("하위 폴더가 없습니다.\n");
 				break;
 			case 4:
 				ParentNode = Linked_dir_return(ParentNode);

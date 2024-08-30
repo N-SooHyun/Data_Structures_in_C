@@ -346,11 +346,10 @@ void Linked_File_Tree_main() {
 
 
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 //2. 동적배열을 이용한 구조체의 모델
-typedef struct Array_File_Node {
-	char* File_Name;
+typedef struct Array_File_Node{
+	char File_Name[FILE_NAME_MAX_SIZE];
 	char* File_Date;
 	char* File_Type;		//dir or txt
 	int type;		//0이면 디렉토리 1이면 파일
@@ -358,10 +357,11 @@ typedef struct Array_File_Node {
 	int child_count;		//현재 자식노드의 수
 	int child_capacity;		//배열의 현재 용량
 }Array_File_Node;
+
 //자식노드들을 가리키는 포인터배열을 동적으로 크기를 늘리거나 줄여서 자식노드들을 할당하는 방식
-Array_File_Node* Array_Create_File_Node(char* name, int type) {
+Array_File_Node* Array_Create_File_Node(char name[], int type) {
 	Array_File_Node* newNode = (Array_File_Node*)malloc(sizeof(Array_File_Node));
-	newNode->File_Name = name;
+	strcpy_s(newNode->File_Name, sizeof(newNode->File_Name), name);
 	newNode->type = type;		//0=dir, 1=txt
 	newNode->File_Type = type == 0 ? "dir" : "txt";
 	newNode->child_count = 0;
@@ -379,8 +379,42 @@ void Array_Add_Child(Array_File_Node* parent, Array_File_Node* child) {
 }
 
 void Array_File_Tree_main() {
-	printf("동적배열 트리 파일 탐색기");
+	Array_File_Node root;
+	root.File_Name[0] = "C:";
+	root.child_capacity = 10;//용량 자식노드
+	root.child_count = 0; //아직 자식노드 없음
+	root.child_arr = (Array_File_Node**)malloc(sizeof(Array_File_Node*) * root.child_capacity);
+
+	Array_File_Node newNode;
+	newNode.File_Name[0] = "down";
+	
+
+	root.child_arr[0] = &newNode;
+
+	printf("root의 주소 : %p\n", &root);
+	printf("root의 자식 리스트의 주소 : %p\n", root.child_arr);
+	printf("root의 자식 : %p\n", root.child_arr[0]);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void File_main() {

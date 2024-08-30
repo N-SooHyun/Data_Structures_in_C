@@ -9,21 +9,19 @@
 #define MAX_SIZE_DATA 100 
 #define MAX_SIZE 10
 
-typedef struct {		//배열리스트의 데이터 모델
-	int id;
-	char name[50];
-	char major[50];
-}Student_ArrayList;
+typedef struct ArrayDynamicModel {
+	char data;
+	struct ArrayDynamicModel* list;
+	int size;	//속해있는 배열에 개수
+	int capacity;	//최대용량
+}ArrayDynamicModel;
 
-double log_two(double data, double base) {
-	return log(data) / log(base);
-}
 
 int main(int argc, char* argv[]) {
-	Linked_File_Tree_main();
-
-	
-	
-	
+	//Array_File_Tree_main();
+	//Priority_Arr_Que_main();
+	//Priority_Linked_Que_main();
+	//Priority_Heap_Arr_main();
+	Priority_Heap_Linked_Que_main();
 }
 

@@ -675,3 +675,8 @@ void Graph_Arr_Weight_main() {
 
 	Graph_Arr_Weight_DFS(&graph, 3,visited); 
 }
+
+//최소비용신장트리
+//최단경로
+//위상정렬 
+//이 3가지는 나중에 알고리즘 공부할때 진행

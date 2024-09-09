@@ -45,6 +45,12 @@
     <ClCompile Include="Priority_Que.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Sort.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="graph.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Tree_Directory.h">

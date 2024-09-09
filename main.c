@@ -6,22 +6,27 @@
 #include <Windows.h>
 
 
-#define MAX_SIZE_DATA 100 
-#define MAX_SIZE 10
-
-typedef struct ArrayDynamicModel {
-	char data;
-	struct ArrayDynamicModel* list;
-	int size;	//속해있는 배열에 개수
-	int capacity;	//최대용량
-}ArrayDynamicModel;
-
-
 int main(int argc, char* argv[]) {
 	//Array_File_Tree_main();
 	//Priority_Arr_Que_main();
 	//Priority_Linked_Que_main();
 	//Priority_Heap_Arr_main();
-	Priority_Heap_Linked_Que_main();
+	//Priority_Heap_Linked_Que_main();
+	//Select_Sort_main();
+	//Insert_Sort_main();
+	//Bubble_Sort_main();
+	//Shell_Sort_main();
+	//Merge_Sort_main();
+	//Graph_List_Default_main();
+	//Graph_Arr_Default_main();
+	//Graph_List_Weight_main();
+	Graph_Arr_Weight_main();
+
+	
+
+	
+	
+
+	
 }
 

@@ -5,6 +5,9 @@
 #include<math.h>
 #include <Windows.h>
 
+typedef struct test {
+	int id;
+}test;
 
 int main(int argc, char* argv[]) {
 	//Array_File_Tree_main();
@@ -20,10 +23,10 @@ int main(int argc, char* argv[]) {
 	//Graph_List_Default_main();
 	//Graph_Arr_Default_main();
 	//Graph_List_Weight_main();
-	Graph_Arr_Weight_main();
-
-	
-
+	//Graph_Arr_Weight_main();
+	//Hash_Student_main();
+	//Hash_Student_Slot_main();
+	Hash_Student_Chaining_main();
 	
 	
 
